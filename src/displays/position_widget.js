@@ -98,6 +98,12 @@ glift.displays.positionWidgetVert = function(
   var aligns = glift.enums.boardAlignments;
   var comps = glift.enums.boardComponents;
   var outBoxes = {};
+  var inOutMappings = {
+    'BOARD': 'boardBox',
+    'COMMENT_BOX': 'commentBox',
+    'ICONBAR': 'iconBarBox',
+    'TITLE_BAR': 'titleBarBox'
+  }
   var ratios = glift.displays._extractRatios(oneColSplits.first);
 
   if (ratios.length === 1) {
@@ -112,36 +118,62 @@ glift.displays.positionWidgetVert = function(
   for (var i = 0; i < oneColSplits.first.length; i++) {
     var comp = oneColSplits.first[i];
     splitMap[comp.component] = splits[i];
-  }
 
-  var board = glift.displays.getResizedBox(splitMap.BOARD, cropbox, aligns.TOP);
-  outBoxes.boardBox = board;
+  }
 
   // TODO(kashomon): Make this more algorithmic by looping over the splits.
   // This doesn't even do the right thing right now -- it forces the order to be
   // board->comment_box->iconbar
-  if (splitMap.COMMENT_BOX) {
-    var bb = outBoxes.boardBase;
-    var commentHeight = splitMap.COMMENT_BOX.height();
-    var boardWidth = board.width();
-    var boardLeft = board.left();
-    var boardBottom = board.bottom();
-    outBoxes.commentBox = glift.displays.bbox(
-        point(boardLeft, boardBottom), boardWidth, commentHeight);
-  }
-  if (splitMap.ICONBAR) {
-    var bb = outBoxes.boardBase;
-    var barHeight = splitMap.ICONBAR.height();
-    var boardLeft = board.left();
-    var boardWidth = board.width();
-    if (outBoxes.commentBox) {
-      var bottom = outBoxes.commentBox.bottom();
-    } else {
-      var bottom = outBoxes.boardBox.bottom();
+  // UPDATE(jetha): Okay, you can designate the order now.
+
+  // Desired order.
+  // TODO(jethac): Let themes designate the order, maybe?
+  var order = [
+    'TITLE_BAR',
+    'BOARD',
+    'COMMENT_BOX',
+    'ICONBAR'
+  ];
+  var orderedBoxes = [];
+
+  // TODO(jethac): Make this suck less than it does. Really, this is A Bad Way.
+  var tempBoard = glift.displays.getResizedBox(
+    splitMap.BOARD,
+    cropbox,
+    aligns.Top
+  );
+
+  var j = 0;
+  for (var i = 0; i < order.length; i++) {
+    var thisObj = splitMap[order[i]];
+    if (thisObj) {
+      var thisBox;
+      var thisHeight = thisObj.height();
+      switch (i) {
+        case 0:      
+          thisBox = glift.displays.bbox(
+            point(tempBoard.left(), 0),
+            tempBoard.width(),
+            thisHeight
+          );
+          break;
+        default:
+          var prevBox = orderedBoxes[j - 1];
+          thisBox = glift.displays.bbox(
+            point(prevBox.left(), prevBox.bottom()),
+            prevBox.width(),
+            thisHeight
+          );
+          break;
+      }
+      // Add this box to the ordered box list.
+      orderedBoxes.push(thisBox);
+      // Add the box to the named box object.
+      outBoxes[inOutMappings[order[i]]] = thisBox;
+      j++;
     }
-    outBoxes.iconBarBox = glift.displays.bbox(
-        point(boardLeft, bottom), boardWidth, barHeight);
-  }
+  };
+
   return outBoxes;
 };
 

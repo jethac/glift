@@ -106,7 +106,7 @@ glift.widgets.options.baseOptions = {
     componentsToUse: [
       'BOARD',
       'COMMENT_BOX',
-      // 'TITLE_BAR', // Not currently supported
+      'TITLE_BAR',
       'ICONBAR'
     ],
 
@@ -291,7 +291,7 @@ glift.widgets.options.baseOptions = {
     oneColumnSplits: {
       first: [
         // TODO(kashomon): Add support for a title bar
-        // { component: 'TITLE_BAR',   ratio: 0.05 },
+        { component: 'TITLE_BAR',   ratio: 0.05 },
         { component: 'BOARD',       ratio: 0.70 },
         { component: 'COMMENT_BOX', ratio: 0.20 },
         { component: 'ICONBAR',     ratio: 0.10 }
@@ -307,7 +307,7 @@ glift.widgets.options.baseOptions = {
       ],
       second: [
         // TODO(kashomon): Add support for a title bar
-        // { component: 'TITLE_BAR',     ratio: 0.10 },
+        { component: 'TITLE_BAR',     ratio: 0.10 },
         { component: 'COMMENT_BOX',   ratio: 0.85 },
         { component: 'ICONBAR',       ratio: 0.15 }
       ]

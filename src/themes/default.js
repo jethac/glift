@@ -115,6 +115,19 @@ glift.themes.registered.DEFAULT = {
     }
   },
 
+  titleBar: {
+    css: {
+      background: '#222',
+      color: '#fff',
+      'border-radius': '6px 6px 0px 0px'
+    },
+    title: {
+      css: {
+        
+      }
+    }
+  },
+
   defs: {
     // TODO(kashomon): Support SVG Defs
   }

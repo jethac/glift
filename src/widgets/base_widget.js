@@ -24,10 +24,14 @@ glift.widgets.BaseWidget = function(
 };
 
 glift.widgets.BaseWidget.prototype = {
+
   /** Draw the widget. */
   draw: function() {
     this.controller = this.sgfOptions.controllerFunc(this.sgfOptions);
     glift.util.majorPerfLog('Created controller');
+
+    this.gameVsTitle = 
+        this.controller.movetree.properties().getOneValue('GN');
 
     this.displayOptions.intersections = this.controller.getIntersections();
 
@@ -78,6 +82,12 @@ glift.widgets.BaseWidget.prototype = {
         theme);
     glift.util.majorPerfLog('CommentBox');
 
+    divIds.titleBarBoxId && this._createTitleBar(
+        divIds.titleBarBoxId,
+        positioning.titleBarBox,
+        theme);
+    glift.util.majorPerfLog('TitleBar');
+
     divIds.iconBarBoxId && this._createIconBar(
         divIds.iconBarBoxId,
         positioning.iconBarBox,
@@ -101,7 +111,7 @@ glift.widgets.BaseWidget.prototype = {
 
   _createDivsForPositioning: function(positioning, wrapperDiv) {
     var expectedKeys = 
-        ['boardBox', 'iconBarBox', 'commentBox', 'extraIconBarBox'];
+        ['boardBox', 'iconBarBox', 'commentBox', 'extraIconBarBox', 'titleBarBox'];
     var out = {};
     var that = this;
     var createDiv = function(bbox) {
@@ -156,6 +166,11 @@ glift.widgets.BaseWidget.prototype = {
       positioning: bbox,
       parentBbox: parentBbox
     });
+  },
+
+  _createTitleBar: function(titleBarBoxId, positioning, theme) {
+    this.titleBar = glift.displays.titlebar.create(
+        titleBarBoxId, positioning, theme);
   },
 
   /**
@@ -241,12 +256,29 @@ glift.widgets.BaseWidget.prototype = {
   applyBoardData: function(boardData) {
     if (boardData) {
       this.setCommentBox(boardData.comment);
+      
+      // TODO(jethac): Don't hardcode this. Maybe we need internationalization support?
+      this.setHeaderTitle(this.gameVsTitle);
       glift.bridge.setDisplayState(
           boardData,
           this.display,
           this.sgfOptions.showVariations,
           this.sgfOptions.markLastMove);
     }
+  },
+
+  /**
+   * Set the HeaderTitle with some specified text, if the header box exists.
+   */
+  setHeaderTitle: function(text) {
+    if (this.titleBar === undefined) {
+      // do nothing!
+    } else if (text) {
+      this.titleBar.setText(text);
+    } else {
+      this.titleBar.clearText();
+    }
+    return this;
   },
 
   /**
